@@ -1,11 +1,12 @@
 import { Formik } from 'formik';
 import React from 'react';
 import { useAppSelector } from '../../app/hooks';
+import { notify } from '../../common/utils/utils';
 import { useLoginMutation } from './authApi';
 import { authSelector } from './authSlice';
 import { LoginForm } from './components/LoginForm';
 import { LoginBody } from './type';
-
+import { useNavigate } from "react-router-dom";
 
 export const LoginPage: React.FunctionComponent = () => {
 
@@ -16,17 +17,27 @@ export const LoginPage: React.FunctionComponent = () => {
     password: ""
   };
 
+
+  const navigate = useNavigate();
+
+
   const handleSubmit = async (values: LoginBody) => {
     try {
       const resp = await login(values);
       if ('data' in resp) {
-        window.location.replace("/numbers")
+        notify({ type: "success", message: "Влязохте успешно" })
+        navigate('/numbers');
+        // window.location.replace("/numbers")
+      }
+      if ('error' in resp) {
+        notify({ type: "error", message: "Грешен имейл или парола" })
       }
     } catch (err) {
       console.log("err");
       console.log(err);
     }
   };
+
 
   const { jwt } = useAppSelector(authSelector);
 
