@@ -1,12 +1,28 @@
 import React from 'react'
 import { useTable, useSortBy, useFlexLayout, usePagination, Row } from 'react-table'
 import { IoIosArrowForward, IoIosArrowBack, IoIosArrowRoundDown, IoIosArrowRoundUp } from 'react-icons/io'
-import { numbers } from "../../../../assets/numbers";
+import { NumberEntity } from '../../type';
+
+interface TableProps { searchValue: string, numbersData: NumberEntity[] }
+
+type TableColumns = "name" | "number" | "tag" | "location" | "options"
+
+const parseNumber = (number: NumberEntity) => {
+  return {
+    id: number.id,
+    name: number.name,
+    number: number.number,
+    tag: number?.tag?.name ?? "няма",
+    location: number?.location?.name ?? "няма",
+    options: ""
+  }
+}
+
+export const Table = ({ searchValue, numbersData }: TableProps) => {
 
 
-export const Table = ({ searchValue }) => {
   const myData = React.useMemo(
-    () => numbers.map(n => ({ ...n, options: "" })),
+    () => numbersData.map(n => (parseNumber(n))),
     []
   )
 
@@ -23,10 +39,6 @@ export const Table = ({ searchValue }) => {
       {
         Header: 'Име',
         accessor: 'name',
-      },
-      {
-        Header: 'Договор',
-        accessor: 'group', // accessor is the "key" in the data
       },
       {
         Header: 'Група',
@@ -75,8 +87,9 @@ export const Table = ({ searchValue }) => {
     )
   }
 
-  const updateMyData = (rowIndex: any, columnId: any, value: any) => {
+  const updateMyData = (rowIndex: number, columnId: TableColumns, value: string) => {
     // We also turn on the flag to not reset the page
+    if (data[rowIndex][columnId] === value) return
     setData(old =>
       old.map((row, index) => {
         if (index === rowIndex) {

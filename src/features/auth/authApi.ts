@@ -21,3 +21,5 @@ export const authApi = createApi({
 });
 
 export const { useLoginMutation } = authApi;
+export const authApiReducer = authApi.reducer;
+export const authApiMiddleware = authApi.middleware;

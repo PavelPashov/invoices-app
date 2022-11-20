@@ -1,7 +1,7 @@
 import { Formik } from 'formik';
 import React from 'react';
 import { useAppSelector } from '../../app/hooks';
-import { notify } from '../../common/utils/utils';
+import { notify } from '../../common/utils/notification';
 import { useLoginMutation } from './authApi';
 import { authSelector } from './authSlice';
 import { LoginForm } from './components/LoginForm';
@@ -27,7 +27,6 @@ export const LoginPage: React.FunctionComponent = () => {
       if ('data' in resp) {
         notify({ type: "success", message: "Влязохте успешно" })
         navigate('/numbers');
-        // window.location.replace("/numbers")
       }
       if ('error' in resp) {
         notify({ type: "error", message: "Грешен имейл или парола" })
