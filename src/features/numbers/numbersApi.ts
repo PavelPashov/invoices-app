@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../../app/store";
-import { NumberEntity } from "./type";
+import { INumber } from "./type";
 
 export const numbersApi = createApi({
   reducerPath: "numbersApi",
@@ -13,15 +13,48 @@ export const numbersApi = createApi({
     },
   }),
   endpoints: (builder) => ({
-    getNumbers: builder.query<NumberEntity[], void>({
+    getNumbers: builder.query<INumber[], void>({
       query: () => ({
         url: "",
         method: "GET",
       }),
     }),
+    updateNumber: builder.mutation({
+      query: (values) => {
+        const { id, ...body } = values;
+        return {
+          url: `/${id}`,
+          method: "PATCH",
+          body,
+        };
+      },
+    }),
+    createNumber: builder.mutation({
+      query: (values) => {
+        return {
+          url: "",
+          method: "POST",
+          body: values,
+        };
+      },
+    }),
+    deleteNumber: builder.mutation({
+      query: (values) => {
+        const { id } = values;
+        return {
+          url: `/${id}`,
+          method: "DELETE",
+        };
+      },
+    }),
   }),
 });
 
-export const { useGetNumbersQuery } = numbersApi;
+export const {
+  useGetNumbersQuery,
+  useUpdateNumberMutation,
+  useCreateNumberMutation,
+  useDeleteNumberMutation,
+} = numbersApi;
 export const numbersApiReducer = numbersApi.reducer;
 export const numbersApiMiddleware = numbersApi.middleware;

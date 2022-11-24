@@ -1,40 +1,81 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTable, useSortBy, useFlexLayout, usePagination, Row } from 'react-table'
 import { IoIosArrowForward, IoIosArrowBack, IoIosArrowRoundDown, IoIosArrowRoundUp } from 'react-icons/io'
-import { NumberEntity } from '../../type';
+import { INumber, INumberRow } from '../../type';
+import { ITag } from '../../../tags/type';
+import { useCreateNumberMutation, useDeleteNumberMutation, useUpdateNumberMutation } from '../../numbersApi';
+import { notify } from '../../../../common/utils/notification';
+import { ILocation } from '../../../locations/types';
 
-interface TableProps { searchValue: string, numbersData: NumberEntity[] }
+interface TableProps { searchValue: string, numbers: INumber[], tags: ITag[], locations: ILocation[] }
 
 type TableColumns = "name" | "number" | "tag" | "location" | "options"
 
-const parseNumber = (number: NumberEntity) => {
-  return {
-    id: number.id,
-    name: number.name,
-    number: number.number,
-    tag: number?.tag?.name ?? "няма",
-    location: number?.location?.name ?? "няма",
-    options: ""
-  }
+const parseNumbers = (numbers: INumber[]): INumberRow[] => {
+  return numbers.map<INumberRow>((number) => {
+    return {
+      ...number,
+      tag: number?.tag?.name ?? "",
+      location: number?.location?.name ?? "",
+      options: ""
+    }
+  })
 }
 
-export const Table = ({ searchValue, numbersData }: TableProps) => {
-
-
-  const myData = React.useMemo(
-    () => numbersData.map(n => (parseNumber(n))),
+export const Table = ({ searchValue, numbers, tags, locations }: TableProps) => {
+  const numbersData = React.useMemo(
+    () => parseNumbers(numbers),
     []
   )
 
-  React.useEffect(() => {
+  const [data, setData] = useState(numbersData);
+  const [dataHistory, setDataHistory] = useState(data)
+
+  const [updateNumber, { isSuccess, isError }] = useUpdateNumberMutation();
+  const [createNumber, { isSuccess: createIsSuccess, isError: createIsError }] = useCreateNumberMutation();
+  const [deleteNumber, { isSuccess: deleteIsSuccess, isError: deleteIsError }] = useDeleteNumberMutation();
+
+  useEffect(() => {
+    if (isSuccess) {
+      notify({ type: "success", message: "Записът е променен успешно!" })
+    }
+    if (isError) {
+      notify({ type: "error", message: "Проблем при записването!" })
+      setData(dataHistory)
+    }
+    if (createIsSuccess) {
+      notify({ type: "success", message: "Записът е създаден успешно!" })
+
+    }
+    if (createIsError) {
+      notify({ type: "error", message: "Проблем при създаването!" })
+      setData(dataHistory)
+    }
+    if (deleteIsSuccess) {
+      notify({ type: "success", message: "Записът е изтрит успешно!" })
+    }
+    if (deleteIsError) {
+      notify({ type: "error", message: "Проблем при изтриването!" })
+      setData(dataHistory)
+    }
+  }, [isSuccess, isError, createIsSuccess, createIsError, deleteIsSuccess, deleteIsError])
+
+
+  useEffect(() => {
     searchTable(searchValue)
   }, [searchValue])
+
+  useEffect(() => {
+    setDataHistory(data.map((d) => ({ ...d, options: "" })))
+    setData(numbersData)
+  }, [numbersData])
+
 
   const columns = React.useMemo(
     () => [
       {
         Header: 'Номер',
-        accessor: 'number', // accessor is the "key" in the data
+        accessor: 'number',
       },
       {
         Header: 'Име',
@@ -46,34 +87,51 @@ export const Table = ({ searchValue, numbersData }: TableProps) => {
       },
       {
         Header: 'Локация',
-        accessor: 'location', // accessor is the "key" in the data
+        accessor: 'location',
       },
       {
         Header: 'Действия',
         accessor: 'options',
-        Cell: row => (
+        Cell: (row: any) => (
           <div>
             {row.row.values.options === "new"
               ? <button className='text-[#7795FF] pr-2' onClick={e => createRow(row.row.original)}>Създай</button> : row.row.values.options === "edit"
                 ? <button className='text-[#7795FF] pr-2' onClick={e => saveRow(row.row.original)}>Запази</button> : null}
-            <button className='text-[#7795FF]' onClick={e => removeRecord(row.row.original)}>Изтрий</button></div>
+            {
+              row.row.values.options === "edit" || row.row.values.options === "new"
+                ? <button className='text-[#7795FF]' onClick={e => handleActionCancelation(row.row.original)}>Отмени</button>
+                : < button className='text-[#7795FF]' onClick={e => removeRecord(row.row.original)}> Изтрий</button >
+            }
+          </div >
         ),
       },
     ],
     []
   )
 
-  const saveRow = (row) => {
-    console.log("Saved");
+  const saveRow = async (row: INumberRow) => {
+    const { options, ...restRow } = row;
+    const toBeSavedRow = {
+      ...restRow,
+      tag: tags.find(t => t.name === row?.tag)?.id ?? null,
+      location: locations.find(l => l.name === row?.location)?.id ?? null,
+    }
+    await updateNumber(toBeSavedRow)
     hideButtons(row)
   }
 
-  const createRow = (row) => {
-    console.log("Created");
+  const createRow = async (row: INumberRow) => {
+    const { options, id, ...restRow } = row;
+    const toBeCreatedRow = {
+      ...restRow,
+      tag: tags.find(t => t.name === row?.tag)?.id ?? null,
+      location: locations.find(l => l.name === row?.location)?.id ?? null,
+    }
+    await createNumber(toBeCreatedRow)
     hideButtons(row)
   }
 
-  const hideButtons = (row) => {
+  const hideButtons = (row: INumberRow) => {
     setData(old =>
       old.map((d) => {
         if (d.number === row.number) {
@@ -88,8 +146,8 @@ export const Table = ({ searchValue, numbersData }: TableProps) => {
   }
 
   const updateMyData = (rowIndex: number, columnId: TableColumns, value: string) => {
-    // We also turn on the flag to not reset the page
-    if (data[rowIndex][columnId] === value) return
+    const oldValue = data[rowIndex][columnId];
+    if (oldValue === value) return
     setData(old =>
       old.map((row, index) => {
         if (index === rowIndex) {
@@ -104,41 +162,38 @@ export const Table = ({ searchValue, numbersData }: TableProps) => {
     )
   }
 
-  const [data, setData] = React.useState(myData);
-
-
-  const removeRecord = (row) => {
-    const answer = confirm("Are you sure you want to delete this record?");
+  const removeRecord = async (row: INumberRow) => {
+    const answer = confirm("Сигурни ли сте, че искате да изтриете този ред?");
     if (answer) {
-      setData(old =>
-        old.filter((d) => {
-          if (d.number === row.number) {
-            return false
-          }
-          return true
-        })
-      )
+      const { id } = row;
+      await deleteNumber({ id })
     }
   }
 
   const addNewRow = () => {
+    gotoPage(pageCount - 1)
     setData(old => {
-      return [{
+      return [...old, {
+        id: null,
         number: "",
         name: "",
-        group: "",
         tag: "",
         location: "",
         options: "new"
-      }, ...old]
+      }]
     })
+  }
+
+  const handleActionCancelation = (row: INumberRow) => {
+    setData(dataHistory)
+    hideButtons(row)
   }
 
   const searchTable = (value: string) => {
     setData(
-      myData.filter((row) => {
+      numbersData.filter((row) => {
         if (row.number.toLowerCase().includes(value.toLowerCase()) || row.name.toLowerCase().includes(value.toLowerCase()) ||
-          row.location.toLowerCase().includes(value.toLowerCase()) || row.tag.toLowerCase().includes(value.toLowerCase())) return true;
+          row.location?.toLowerCase().includes(value.toLowerCase()) || row.tag?.toLowerCase().includes(value.toLowerCase())) return true;
         return false;
       })
     )
@@ -149,12 +204,22 @@ export const Table = ({ searchValue, numbersData }: TableProps) => {
     row: { index },
     column: { id },
     updateMyData, // This is a custom function that we supplied to our table instance
+  }: {
+    value: string,
+    row: { index: number },
+    column: { id: string }
+    updateMyData: any
   }) => {
     // We need to keep and update the state of the cell normally
-    const [value, setValue] = React.useState(initialValue)
+    const [value, setValue] = useState(initialValue)
 
     const onChange = (e: { target: { value: string } }) => {
       setValue(e.target.value)
+    }
+
+    const onChangeSelect = (e: { target: { value: string } }) => {
+      setValue(e.target.value)
+      updateMyData(index, id, e.target.value)
     }
 
     // We'll only update the external data when the input is blurred
@@ -164,9 +229,25 @@ export const Table = ({ searchValue, numbersData }: TableProps) => {
 
 
     // If the initialValue is changed external, sync it up with our state
-    React.useEffect(() => {
+    useEffect(() => {
       setValue(initialValue)
     }, [initialValue])
+
+    if (id === "tag") {
+      return <select value={value} onChange={onChangeSelect}>
+        {[{ name: "", id: 0 }, ...tags].map((tag) => {
+          return <option key={tag.id}>{tag.name}</option>;
+        })}
+      </select >
+    }
+
+    if (id === "location") {
+      return <select value={value} onChange={onChangeSelect}>
+        {[{ name: "", id: 0 }, ...locations].map((location) => {
+          return <option key={location.id}>{location.name}</option>;
+        })}
+      </select >
+    }
 
     return <input value={value} onChange={onChange} onBlur={onBlur} />
   }
@@ -174,7 +255,6 @@ export const Table = ({ searchValue, numbersData }: TableProps) => {
   const defaultColumn = {
     Cell: EditableCell,
   }
-
 
   const {
     getTableProps,
@@ -191,17 +271,17 @@ export const Table = ({ searchValue, numbersData }: TableProps) => {
     previousPage,
     setPageSize,
     state: { pageIndex, pageSize },
-  } = useTable({ data, columns, defaultColumn, updateMyData, initialState: { pageIndex: 0, defaultPageSize: 10 } }, useSortBy, useFlexLayout, usePagination)
+  } = useTable({ data, columns, defaultColumn, updateMyData, initialState: { pageIndex: 0, defaultPageSize: 10 }, autoResetPage: false }, useSortBy, useFlexLayout, usePagination)
 
   return (
     <>
-      <div className="w-full h-fit overflow-y-scroll overflow-hidden">
-        <table {...getTableProps()} className="w-full h-full">
+      <div className="w-full overflow-y-scroll max-h-full">
+        <table {...getTableProps()} className="w-full">
           <thead className='bg-[#F8F8F8]'>
             {headerGroups.map(headerGroup => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map(column => (
-                  <th className="flex items-center py-3 text-xs px-2 border-b-[1px] font-semibold text-neutral-500"
+                  <th className="flex items-center py-2 text-xs px-2 border-b-[1px] font-semibold text-neutral-500"
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                   >
                     {column.render('Header')}
@@ -215,8 +295,9 @@ export const Table = ({ searchValue, numbersData }: TableProps) => {
                   </th>
                 ))}
               </tr>
-            ))}
-          </thead>
+            ))
+            }
+          </thead >
           <tbody {...getTableBodyProps()}>
             {page.map((row: Row<{ col1: string; col2: string; col3: string; col4: string; col5: string; col6: string }>, i: any) => {
               prepareRow(row)
@@ -229,8 +310,8 @@ export const Table = ({ searchValue, numbersData }: TableProps) => {
               )
             })}
           </tbody>
-        </table>
-      </div>
+        </table >
+      </div >
 
       <div className="flex justify-start mb-5 absolute bottom-0 ml-5">
         <button className="text-[#7795FF]" onClick={addNewRow}>Създай нов</button>
@@ -244,9 +325,9 @@ export const Table = ({ searchValue, numbersData }: TableProps) => {
               setPageSize(Number(e.target.value))
             }}
           >
-            {[10, 15, 20, 25].map(pageSize => (
+            {[10, 25, 50, 75, 150].map(pageSize => (
               <option key={pageSize} value={pageSize}>
-                Show {pageSize}
+                Покажи {pageSize}
               </option>
             ))}
           </select>

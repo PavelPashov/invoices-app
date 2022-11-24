@@ -1,5 +1,5 @@
 import { Formik } from 'formik';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAppSelector } from '../../app/hooks';
 import { notify } from '../../common/utils/notification';
 import { useLoginMutation } from './authApi';
@@ -10,33 +10,30 @@ import { useNavigate } from "react-router-dom";
 
 export const LoginPage: React.FunctionComponent = () => {
 
-  const [login, { isLoading, isError, reset }] = useLoginMutation();
+  const [login, { isSuccess, isError }] = useLoginMutation();
 
   const initialValues: LoginBody = {
     email: "",
     password: ""
   };
 
-
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (isSuccess) {
+      notify({ type: "success", message: "Успешно влизане" });
+      navigate('/numbers');
+    }
+    if (isError) notify({ type: "error", message: "Грешен имейл или парола" })
+  }, [isSuccess, isError])
 
   const handleSubmit = async (values: LoginBody) => {
     try {
-      const resp = await login(values);
-      if ('data' in resp) {
-        notify({ type: "success", message: "Влязохте успешно" })
-        navigate('/numbers');
-      }
-      if ('error' in resp) {
-        notify({ type: "error", message: "Грешен имейл или парола" })
-      }
+      await login(values);
     } catch (err) {
-      console.log("err");
       console.log(err);
     }
   };
-
 
   const { jwt } = useAppSelector(authSelector);
 

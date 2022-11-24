@@ -1,4 +1,8 @@
 import {
+  locationsReducer,
+  locationsSlice,
+} from "./../features/locations/locationsSlice";
+import {
   numbersReducer,
   numbersSlice,
 } from "./../features/numbers/numbersSlice";
@@ -14,12 +18,27 @@ import {
   numbersApiMiddleware,
   numbersApiReducer,
 } from "../features/numbers/numbersApi";
+import {
+  tagsApi,
+  tagsApiMiddleware,
+  tagsApiReducer,
+} from "../features/tags/tagsApi";
+import { tagsSlice, tagsReducer } from "../features/tags/tagsSlice";
+import {
+  locationsApi,
+  locationsApiMiddleware,
+  locationsApiReducer,
+} from "../features/locations/locationsApi";
 
 const combinedReducer = combineReducers({
   [authSlice.name]: authReducer,
   [authApi.reducerPath]: authApiReducer,
   [numbersSlice.name]: numbersReducer,
   [numbersApi.reducerPath]: numbersApiReducer,
+  [tagsSlice.name]: tagsReducer,
+  [tagsApi.reducerPath]: tagsApiReducer,
+  [locationsSlice.name]: locationsReducer,
+  [locationsApi.reducerPath]: locationsApiReducer,
 });
 
 const rootReducer = (state: any, action: any) => {
@@ -34,7 +53,9 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false })
       .concat(authApiMiddleware)
-      .concat(numbersApiMiddleware),
+      .concat(numbersApiMiddleware)
+      .concat(tagsApiMiddleware)
+      .concat(locationsApiMiddleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -1,8 +1,13 @@
 import React from 'react';
 import searchSvg from "../../../../assets/search.svg";
 
+interface SearchBarProps {
+  setSearchValue: Function;
+  value: string;
+}
 
-export const SearchBar: React.FunctionComponent = ({ setSearchValue, value }) => {
+
+export const SearchBar = ({ setSearchValue, value }: SearchBarProps) => {
   return (
     <div className="flex flex-row w-auto h-full items-center">
       <label className="flex bg-[#F8F8F8] w-2/5 p-1 rounded-md placeholder:text-sm placeholder:pl-3">

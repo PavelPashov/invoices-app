@@ -1,17 +1,20 @@
-export interface Tag {
-  id: number;
-  name: string;
-}
+import { ILocation } from "../locations/types";
+import { ITag } from "../tags/type";
 
-export interface Location {
-  id: number;
-  name: string;
-}
-
-export interface NumberEntity {
-  id: number;
+interface IBaseNumber {
+  id: number | null;
   number: string;
   name: string;
-  tag?: Tag;
-  location?: Location;
+}
+
+export interface INumber extends IBaseNumber {
+  tag?: ITag;
+  location?: ILocation;
+  options?: string;
+}
+
+export interface INumberRow extends IBaseNumber {
+  tag: string;
+  location: string;
+  options: string;
 }

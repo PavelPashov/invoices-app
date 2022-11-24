@@ -1,5 +1,9 @@
-import React, { useEffect, useState } from "react"
+import React from "react"
 import { useAppSelector } from "../../../app/hooks";
+import { useGetLocationsQuery } from "../../locations/locationsApi";
+import { locationsSelector } from "../../locations/locationsSlice";
+import { useGetTagsQuery } from "../../tags/tagsApi";
+import { tagsSelector } from "../../tags/tagsSlice";
 import { SearchBar } from "../components/searchBar/SearchBar"
 import { Table } from "../components/table/Table"
 import { useGetNumbersQuery } from "../numbersApi";
@@ -7,19 +11,24 @@ import { numbersSelector } from "../numbersSlice";
 
 export const NumbersPage = () => {
   const { isFetching } = useGetNumbersQuery();
+  useGetTagsQuery()
+  useGetLocationsQuery()
 
   const { numbers } = useAppSelector(numbersSelector);
+  const { tags } = useAppSelector(tagsSelector);
+  const { locations } = useAppSelector(locationsSelector);
 
   const [searchValue, setSearchValue] = React.useState("")
-  return isFetching ? (<div className="flex flex-row min-h-screen"><p>Зарежда...</p></div>) :
-    (< div className="flex flex-col w-screen min-h-screen" >
+
+  return isFetching || !numbers.length || !tags.length || !locations.length
+    ? (<div className="flex w-screen align-middle justify-center"><p className="flex flex-col justify-center">Зарежда се...</p></div>)
+    : (< div className="flex flex-col w-screen" >
       <div className="flex flex-col w-auto h-16 border-b-[1px] pl-8">
         <SearchBar setSearchValue={setSearchValue} value={searchValue} />
       </div>
-      <div className="p-5  text-sm">
-        <Table searchValue={searchValue} numbersData={numbers} />
+      <div className="p-4 max-h-[86vh] text-sm">
+        <Table searchValue={searchValue} numbers={numbers} tags={tags} locations={locations} />
       </div>
     </div >
-
     )
 }

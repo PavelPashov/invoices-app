@@ -1,9 +1,9 @@
-import { NumberEntity } from "./type";
+import { INumber } from "./type";
 import { createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
 import { numbersApi } from "./numbersApi";
 
-const initialState: { numbers: NumberEntity[] | [] } = {
+const initialState: { numbers: INumber[] | [] } = {
   numbers: [],
 };
 
@@ -20,6 +20,36 @@ export const numbersSlice = createSlice({
       numbersApi.endpoints.getNumbers.matchFulfilled,
       (state, { payload }) => {
         state.numbers = payload;
+      }
+    );
+    builder.addMatcher(
+      numbersApi.endpoints.updateNumber.matchFulfilled,
+      (state, { payload }) => {
+        const { id } = payload;
+        state.numbers = state.numbers.map((num) => {
+          if (num.id !== id) return num;
+          return payload;
+        });
+      }
+    );
+    builder.addMatcher(
+      numbersApi.endpoints.createNumber.matchFulfilled,
+      (state, { payload }) => {
+        const { id } = payload;
+        state.numbers = state.numbers.map((num) => {
+          if (num.id !== id) return num;
+          return {
+            ...num,
+            id,
+          };
+        });
+      }
+    );
+    builder.addMatcher(
+      numbersApi.endpoints.deleteNumber.matchFulfilled,
+      (state, { payload }) => {
+        const { id } = payload;
+        state.numbers = state.numbers.filter((num) => num.id !== id);
       }
     );
   },

@@ -12,7 +12,7 @@ export const Routing = () => {
   return (
     <>
       <Routes>
-        <Route index element={<div>Hello</div>} />
+        <Route index element={<div>Fakturi</div>} />
         <Route path="/numbers" element={PrivateRoute({ children: <NumbersPage /> })} />
         <Route path="/login" element={<LoginPage />} />
       </Routes >
