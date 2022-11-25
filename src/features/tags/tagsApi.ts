@@ -1,10 +1,9 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../../app/store";
 import { ITag } from "./type";
 
-export const tagsApi = createApi({
-  reducerPath: "tagsApi",
-  baseQuery: fetchBaseQuery({
+const retryBaseQuery = retry(
+  fetchBaseQuery({
     baseUrl: `${import.meta.env.VITE_API_URL}/v1/tag`,
     prepareHeaders: (headers: Headers, { getState }) => {
       const token = (getState() as RootState).auth.jwt;
@@ -12,6 +11,14 @@ export const tagsApi = createApi({
       return headers;
     },
   }),
+  {
+    maxRetries: 5,
+  }
+);
+
+export const tagsApi = createApi({
+  reducerPath: "tagsApi",
+  baseQuery: retryBaseQuery,
   endpoints: (builder) => ({
     getTags: builder.query<ITag[], void>({
       query: () => ({

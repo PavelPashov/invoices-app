@@ -1,10 +1,9 @@
 import { ILocation } from "./types";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../../app/store";
 
-export const locationsApi = createApi({
-  reducerPath: "locationsApi",
-  baseQuery: fetchBaseQuery({
+const retryBaseQuery = retry(
+  fetchBaseQuery({
     baseUrl: `${import.meta.env.VITE_API_URL}/v1/location`,
     prepareHeaders: (headers: Headers, { getState }) => {
       const token = (getState() as RootState).auth.jwt;
@@ -12,6 +11,14 @@ export const locationsApi = createApi({
       return headers;
     },
   }),
+  {
+    maxRetries: 5,
+  }
+);
+
+export const locationsApi = createApi({
+  reducerPath: "locationsApi",
+  baseQuery: retryBaseQuery,
   endpoints: (builder) => ({
     getLocations: builder.query<ILocation[], void>({
       query: () => ({

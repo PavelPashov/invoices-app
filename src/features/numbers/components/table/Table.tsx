@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useTable, useSortBy, useFlexLayout, usePagination, Row } from 'react-table'
 import { IoIosArrowForward, IoIosArrowBack, IoIosArrowRoundDown, IoIosArrowRoundUp } from 'react-icons/io'
 import { INumber, INumberRow } from '../../type';
@@ -23,12 +23,8 @@ const parseNumbers = (numbers: INumber[]): INumberRow[] => {
 }
 
 export const Table = ({ searchValue, numbers, tags, locations }: TableProps) => {
-  const numbersData = React.useMemo(
-    () => parseNumbers(numbers),
-    []
-  )
+  const [data, setData] = useState(parseNumbers(numbers));
 
-  const [data, setData] = useState(numbersData);
   const [dataHistory, setDataHistory] = useState(data)
 
   const [updateNumber, { isSuccess, isError }] = useUpdateNumberMutation();
@@ -43,14 +39,17 @@ export const Table = ({ searchValue, numbers, tags, locations }: TableProps) => 
       notify({ type: "error", message: "Проблем при записването!" })
       setData(dataHistory)
     }
+  }, [isSuccess, isError])
+  useEffect(() => {
     if (createIsSuccess) {
       notify({ type: "success", message: "Записът е създаден успешно!" })
-
     }
     if (createIsError) {
       notify({ type: "error", message: "Проблем при създаването!" })
       setData(dataHistory)
     }
+  }, [createIsSuccess, createIsError])
+  useEffect(() => {
     if (deleteIsSuccess) {
       notify({ type: "success", message: "Записът е изтрит успешно!" })
     }
@@ -58,8 +57,7 @@ export const Table = ({ searchValue, numbers, tags, locations }: TableProps) => 
       notify({ type: "error", message: "Проблем при изтриването!" })
       setData(dataHistory)
     }
-  }, [isSuccess, isError, createIsSuccess, createIsError, deleteIsSuccess, deleteIsError])
-
+  }, [deleteIsSuccess, deleteIsError])
 
   useEffect(() => {
     searchTable(searchValue)
@@ -67,8 +65,8 @@ export const Table = ({ searchValue, numbers, tags, locations }: TableProps) => 
 
   useEffect(() => {
     setDataHistory(data.map((d) => ({ ...d, options: "" })))
-    setData(numbersData)
-  }, [numbersData])
+    setData(parseNumbers(numbers))
+  }, [numbers])
 
 
   const columns = React.useMemo(
@@ -165,8 +163,8 @@ export const Table = ({ searchValue, numbers, tags, locations }: TableProps) => 
   const removeRecord = async (row: INumberRow) => {
     const answer = confirm("Сигурни ли сте, че искате да изтриете този ред?");
     if (answer) {
-      const { id } = row;
-      await deleteNumber({ id })
+      await deleteNumber(row)
+      setData(data.filter(d => d.id !== row.id))
     }
   }
 
@@ -191,7 +189,7 @@ export const Table = ({ searchValue, numbers, tags, locations }: TableProps) => 
 
   const searchTable = (value: string) => {
     setData(
-      numbersData.filter((row) => {
+      parseNumbers(numbers).filter((row) => {
         if (row.number.toLowerCase().includes(value.toLowerCase()) || row.name.toLowerCase().includes(value.toLowerCase()) ||
           row.location?.toLowerCase().includes(value.toLowerCase()) || row.tag?.toLowerCase().includes(value.toLowerCase())) return true;
         return false;
@@ -286,11 +284,13 @@ export const Table = ({ searchValue, numbers, tags, locations }: TableProps) => 
                   >
                     {column.render('Header')}
                     <span>
-                      {column.isSorted
-                        ? column.isSortedDesc
-                          ? <IoIosArrowRoundDown className='flex text-lg' />
-                          : <IoIosArrowRoundUp className='flex text-lg' />
-                        : ''}
+                      {
+                        column.isSorted
+                          ? column.isSortedDesc
+                            ? <IoIosArrowRoundDown className='flex text-lg' />
+                            : <IoIosArrowRoundUp className='flex text-lg' />
+                          : ''
+                      }
                     </span>
                   </th>
                 ))}

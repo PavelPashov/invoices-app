@@ -35,14 +35,8 @@ export const numbersSlice = createSlice({
     builder.addMatcher(
       numbersApi.endpoints.createNumber.matchFulfilled,
       (state, { payload }) => {
-        const { id } = payload;
-        state.numbers = state.numbers.map((num) => {
-          if (num.id !== id) return num;
-          return {
-            ...num,
-            id,
-          };
-        });
+        const { numbers, ...restNumber } = payload;
+        state.numbers = [...state.numbers, restNumber];
       }
     );
     builder.addMatcher(

@@ -1,10 +1,14 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import {
+  createApi,
+  FetchArgs,
+  fetchBaseQuery,
+  retry,
+} from "@reduxjs/toolkit/query/react";
 import { RootState } from "../../app/store";
 import { INumber } from "./type";
 
-export const numbersApi = createApi({
-  reducerPath: "numbersApi",
-  baseQuery: fetchBaseQuery({
+const retryBaseQuery = retry(
+  fetchBaseQuery({
     baseUrl: `${import.meta.env.VITE_API_URL}/v1/phone`,
     prepareHeaders: (headers: Headers, { getState }) => {
       const token = (getState() as RootState).auth.jwt;
@@ -12,6 +16,14 @@ export const numbersApi = createApi({
       return headers;
     },
   }),
+  {
+    maxRetries: 5,
+  }
+);
+
+export const numbersApi = createApi({
+  reducerPath: "numbersApi",
+  baseQuery: retryBaseQuery,
   endpoints: (builder) => ({
     getNumbers: builder.query<INumber[], void>({
       query: () => ({
@@ -28,6 +40,7 @@ export const numbersApi = createApi({
           body,
         };
       },
+      extraOptions: { maxRetries: 0 },
     }),
     createNumber: builder.mutation({
       query: (values) => {
@@ -37,6 +50,7 @@ export const numbersApi = createApi({
           body: values,
         };
       },
+      extraOptions: { maxRetries: 0 },
     }),
     deleteNumber: builder.mutation({
       query: (values) => {
@@ -46,6 +60,7 @@ export const numbersApi = createApi({
           method: "DELETE",
         };
       },
+      extraOptions: { maxRetries: 0 },
     }),
   }),
 });
