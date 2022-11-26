@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { LoginPage } from "../features/auth/LoginPage";
+import { InvoicesPage } from "../features/numbers/pages/InvoicesPage";
 import { NumbersPage } from "../features/numbers/pages/NumbersPage";
 
 export const Routing = () => {
@@ -12,7 +13,7 @@ export const Routing = () => {
   return (
     <>
       <Routes>
-        <Route index element={<div>Fakturi</div>} />
+        <Route index element={PrivateRoute({ children: <InvoicesPage /> })} />
         <Route path="/numbers" element={PrivateRoute({ children: <NumbersPage /> })} />
         <Route path="/login" element={<LoginPage />} />
       </Routes >

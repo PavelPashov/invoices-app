@@ -22,7 +22,7 @@ export const LoginPage: React.FunctionComponent = () => {
   useEffect(() => {
     if (isSuccess) {
       notify({ type: "success", message: "Успешно влизане" });
-      navigate('/numbers');
+      navigate('/');
     }
     if (isError) notify({ type: "error", message: "Грешен имейл или парола" })
   }, [isSuccess, isError])

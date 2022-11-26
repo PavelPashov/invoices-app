@@ -62,6 +62,16 @@ export const numbersApi = createApi({
       },
       extraOptions: { maxRetries: 0 },
     }),
+    uploadFile: builder.mutation<File, FormData>({
+      query: (body) => {
+        return {
+          method: "POST",
+          url: "/invoice",
+          body,
+        };
+      },
+      extraOptions: { maxRetries: 0 },
+    }),
   }),
 });
 
@@ -70,6 +80,7 @@ export const {
   useUpdateNumberMutation,
   useCreateNumberMutation,
   useDeleteNumberMutation,
+  useUploadFileMutation,
 } = numbersApi;
 export const numbersApiReducer = numbersApi.reducer;
 export const numbersApiMiddleware = numbersApi.middleware;

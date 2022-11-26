@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { useTable, useSortBy, useFlexLayout, usePagination, Row } from 'react-table'
+import { useTable, useSortBy, useFlexLayout, usePagination, Row, Column, UseTableCellProps, ColumnInstance } from 'react-table'
 import { IoIosArrowForward, IoIosArrowBack, IoIosArrowRoundDown, IoIosArrowRoundUp } from 'react-icons/io'
 import { INumber, INumberRow } from '../../type';
 import { ITag } from '../../../tags/type';
@@ -69,7 +69,7 @@ export const Table = ({ searchValue, numbers, tags, locations }: TableProps) => 
   }, [numbers])
 
 
-  const columns = React.useMemo(
+  const columns: any = React.useMemo(
     () => [
       {
         Header: 'Номер',
@@ -90,7 +90,7 @@ export const Table = ({ searchValue, numbers, tags, locations }: TableProps) => 
       {
         Header: 'Действия',
         accessor: 'options',
-        Cell: (row: any) => (
+        Cell: (row: UseTableCellProps<INumberRow>) => (
           <div>
             {row.row.values.options === "new"
               ? <button className='text-[#7795FF] pr-2' onClick={e => createRow(row.row.original)}>Създай</button> : row.row.values.options === "edit"
@@ -202,12 +202,7 @@ export const Table = ({ searchValue, numbers, tags, locations }: TableProps) => 
     row: { index },
     column: { id },
     updateMyData, // This is a custom function that we supplied to our table instance
-  }: {
-    value: string,
-    row: { index: number },
-    column: { id: string }
-    updateMyData: any
-  }) => {
+  }: any) => {
     // We need to keep and update the state of the cell normally
     const [value, setValue] = useState(initialValue)
 
@@ -269,7 +264,7 @@ export const Table = ({ searchValue, numbers, tags, locations }: TableProps) => 
     previousPage,
     setPageSize,
     state: { pageIndex, pageSize },
-  } = useTable({ data, columns, defaultColumn, updateMyData, initialState: { pageIndex: 0, defaultPageSize: 10 }, autoResetPage: false }, useSortBy, useFlexLayout, usePagination)
+  } = useTable({ data, columns, defaultColumn, updateMyData, initialState: { pageIndex: 0, pageSize: 10 }, autoResetPage: false }, useSortBy, useFlexLayout, usePagination)
 
   return (
     <>
@@ -299,7 +294,7 @@ export const Table = ({ searchValue, numbers, tags, locations }: TableProps) => 
             }
           </thead >
           <tbody {...getTableBodyProps()}>
-            {page.map((row: Row<{ col1: string; col2: string; col3: string; col4: string; col5: string; col6: string }>, i: any) => {
+            {page.map((row: Row<INumberRow>) => {
               prepareRow(row)
               return (
                 <tr {...row.getRowProps()}>

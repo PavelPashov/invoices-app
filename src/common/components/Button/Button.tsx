@@ -2,7 +2,7 @@ import React from 'react';
 
 interface ButtonProps {
   title: string;
-  onClick?: () => void;
+  onClick?: (e: any) => void;
   type?: "button" | "submit" | "reset" | undefined;
 }
 

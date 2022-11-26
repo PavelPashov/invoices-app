@@ -18,3 +18,11 @@ export interface INumberRow extends IBaseNumber {
   location: string;
   options: string;
 }
+
+export interface File {
+  id: number;
+  name: string;
+  mimetype: MimeType;
+  createdAt: Date;
+  url: string;
+}
