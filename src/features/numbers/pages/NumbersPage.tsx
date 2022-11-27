@@ -27,7 +27,7 @@ export const NumbersPage = () => {
       <div className="flex flex-col w-auto h-16 border-b-[1px] pl-8">
         <SearchBar setSearchValue={setSearchValue} value={searchValue} />
       </div>
-      <div className="p-4 max-h-[86vh] text-sm">
+      <div className="p-2 max-h-[86vh] text-sm">
         <Table searchValue={searchValue} numbers={numbers} tags={tags} locations={locations} />
       </div>
     </div >

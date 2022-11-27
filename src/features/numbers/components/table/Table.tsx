@@ -268,7 +268,7 @@ export const Table = ({ searchValue, numbers, tags, locations }: TableProps) => 
 
   return (
     <>
-      <div className="w-full overflow-y-scroll max-h-full">
+      <div className="w-full overflow-y-scroll max-h-[79vh] text-sm">
         <table {...getTableProps()} className="w-full">
           <thead className='bg-[#F8F8F8]'>
             {headerGroups.map(headerGroup => (
@@ -308,35 +308,38 @@ export const Table = ({ searchValue, numbers, tags, locations }: TableProps) => 
         </table >
       </div >
 
-      <div className="flex justify-start mb-5 absolute bottom-0 ml-5">
-        <button className="text-[#7795FF]" onClick={addNewRow}>Създай нов</button>
-      </div>
-
-      <div className="flex justify-end mb-5 absolute bottom-0 right-0 mr-5">
-        <div className="flex">
-          <select
-            value={pageSize}
-            onChange={e => {
-              setPageSize(Number(e.target.value))
-            }}
-          >
-            {[10, 25, 50, 75, 150].map(pageSize => (
-              <option key={pageSize} value={pageSize}>
-                Покажи {pageSize}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex">
-          <button className="mr-5" onClick={() => previousPage()} disabled={!canPreviousPage}>
-            <IoIosArrowBack />
-          </button>
-          <span>
-            {pageIndex + 1}/{pageOptions.length}
-          </span>
-          <button className="ml-5" onClick={() => nextPage()} disabled={!canNextPage}>
-            <IoIosArrowForward />
-          </button>
+      <div className='flex flex-col'>
+        <div className="flex flex-row mt-6 min-h-full h-full align-middle ">
+          <div className="flex flex-row items-start justify-start w-1/2 min-h-full h-full align-middle">
+            <button className="text-[#7795FF]" onClick={addNewRow}>Създай нов</button>
+          </div>
+          <div className="flex flex-row items-end justify-end mb-auto mt-auto w-1/2">
+            <div className="flex flex-row">
+              <select
+                value={pageSize}
+                onChange={e => {
+                  setPageSize(Number(e.target.value))
+                }}
+              >
+                {[10, 25, 50, 75, 150].map(pageSize => (
+                  <option key={pageSize} value={pageSize}>
+                    Покажи {pageSize}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-row">
+              <button className="mr-5" onClick={() => previousPage()} disabled={!canPreviousPage}>
+                <IoIosArrowBack />
+              </button>
+              <span>
+                {pageIndex + 1}/{pageOptions.length}
+              </span>
+              <button className="ml-5" onClick={() => nextPage()} disabled={!canNextPage}>
+                <IoIosArrowForward />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </>

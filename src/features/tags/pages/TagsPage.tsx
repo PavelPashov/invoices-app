@@ -20,7 +20,7 @@ export const TagsPage = () => {
       <div className="flex flex-col w-auto h-16 border-b-[1px] pl-8">
         <SearchBar setSearchValue={setSearchValue} value={searchValue} />
       </div>
-      <div className="p-4 max-h-[86vh] text-sm">
+      <div className="p-2 max-h-[88vh] text-sm">
         <TagsTable searchValue={searchValue} tags={tags} />
       </div>
     </div >
