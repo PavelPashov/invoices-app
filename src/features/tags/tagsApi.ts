@@ -18,6 +18,7 @@ const retryBaseQuery = retry(
 
 export const tagsApi = createApi({
   reducerPath: "tagsApi",
+  refetchOnMountOrArgChange: true,
   baseQuery: retryBaseQuery,
   endpoints: (builder) => ({
     getTags: builder.query<ITag[], void>({
@@ -26,9 +27,45 @@ export const tagsApi = createApi({
         method: "GET",
       }),
     }),
+    updateTag: builder.mutation({
+      query: (values) => {
+        const { id, numbers, ...body } = values;
+        return {
+          url: `/${id}`,
+          method: "PATCH",
+          body,
+        };
+      },
+      extraOptions: { maxRetries: 0 },
+    }),
+    createTag: builder.mutation({
+      query: (values) => {
+        return {
+          url: "",
+          method: "POST",
+          body: values,
+        };
+      },
+      extraOptions: { maxRetries: 0 },
+    }),
+    deleteTag: builder.mutation({
+      query: (values) => {
+        const { id } = values;
+        return {
+          url: `/${id}`,
+          method: "DELETE",
+        };
+      },
+      extraOptions: { maxRetries: 0 },
+    }),
   }),
 });
 
-export const { useGetTagsQuery } = tagsApi;
+export const {
+  useGetTagsQuery,
+  useUpdateTagMutation,
+  useCreateTagMutation,
+  useDeleteTagMutation,
+} = tagsApi;
 export const tagsApiReducer = tagsApi.reducer;
 export const tagsApiMiddleware = tagsApi.middleware;

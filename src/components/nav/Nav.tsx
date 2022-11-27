@@ -32,8 +32,12 @@ export const Nav: React.FunctionComponent = () => {
           )}>
             <div className="flex flex-col w-auto text-sm p-2" >Номера</div>
           </NavLink>
+          <NavLink to={'/tags'} style={({ isActive }) => (
+            isActive ? activeStyle : {}
+          )}>
+            <div className="flex flex-col w-auto text-sm p-2" >Групи</div>
+          </NavLink>
           <div className="flex flex-col w-auto text-sm p-2">Локации</div>
-          <div className="flex flex-col w-auto text-sm p-2">Групи</div>
           <button className="flex flex-col mt-auto text-sm p-2 mb-3" onClick={logoutUser}><span>Изход</span></button>
         </div> : ""}
         <Routing />

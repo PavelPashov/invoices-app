@@ -23,6 +23,7 @@ const retryBaseQuery = retry(
 
 export const numbersApi = createApi({
   reducerPath: "numbersApi",
+  refetchOnMountOrArgChange: true,
   baseQuery: retryBaseQuery,
   endpoints: (builder) => ({
     getNumbers: builder.query<INumber[], void>({

@@ -1,5 +1,5 @@
 import React from 'react';
-import searchSvg from "../../../../assets/search.svg";
+import searchSvg from "../../../assets/search.svg";
 
 interface SearchBarProps {
   setSearchValue: Function;

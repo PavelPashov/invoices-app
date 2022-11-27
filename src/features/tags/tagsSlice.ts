@@ -22,6 +22,30 @@ export const tagsSlice = createSlice({
         state.tags = payload;
       }
     );
+    builder.addMatcher(
+      tagsApi.endpoints.updateTag.matchFulfilled,
+      (state, { payload }) => {
+        const { id } = payload;
+        state.tags = state.tags.map((tag) => {
+          if (tag.id !== id) return tag;
+          return payload;
+        });
+      }
+    );
+    builder.addMatcher(
+      tagsApi.endpoints.createTag.matchFulfilled,
+      (state, { payload }) => {
+        const { numbers, ...restTag } = payload;
+        state.tags = [...state.tags, restTag];
+      }
+    );
+    builder.addMatcher(
+      tagsApi.endpoints.deleteTag.matchFulfilled,
+      (state, { payload }) => {
+        const { id } = payload;
+        state.tags = state.tags.filter((tag) => tag.id !== id);
+      }
+    );
   },
 });
 
