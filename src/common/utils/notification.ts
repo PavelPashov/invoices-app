@@ -9,8 +9,8 @@ export const notify = (options: INotification) => {
   const { type, message } = options;
   return toast[type](message, {
     position: "top-center",
-    autoClose: type === "success" ? 1500 : 3000,
-    hideProgressBar: true,
+    autoClose: type === "success" ? 3000 : 3000,
+    hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
     draggable: true,
