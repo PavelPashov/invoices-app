@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Button } from '../../../../common/components/Button/Button'
 import { notify } from '../../../../common/utils/notification'
+import { LoadingSpinner } from '../../../../components/spinner/Spinner'
 import { useUploadFileMutation } from '../../numbersApi'
 
 export const Dropzone = () => {
@@ -61,7 +62,7 @@ export const Dropzone = () => {
       <div {...getRootProps()} className="min-h-[50vh] min-w-[70vh] flex flex-col items-center justify-center p-10 border-[#7795FF] border-2 rounded-2xl">
         <input {...getInputProps()} />
         {
-          isLoading ? <p>Файлът се обработва ...</p> :
+          isLoading ? <LoadingSpinner /> :
             isDragActive ?
               <p>Пуснете файла тук ...</p> :
               <p>{areButtonsVisible ? `Избран файл: ${file?.name}` : "Поставете .zip файл с JSON фактури тук"}</p>

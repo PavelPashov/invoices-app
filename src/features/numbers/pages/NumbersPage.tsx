@@ -1,5 +1,6 @@
 import React from "react"
 import { useAppSelector } from "../../../app/hooks";
+import { LoadingSpinner } from "../../../components/spinner/Spinner";
 import { useGetLocationsQuery } from "../../locations/locationsApi";
 import { locationsSelector } from "../../locations/locationsSlice";
 import { useGetTagsQuery } from "../../tags/tagsApi";
@@ -21,7 +22,7 @@ export const NumbersPage = () => {
   const [searchValue, setSearchValue] = React.useState("")
 
   return isFetching || !numbers.length || !tags.length || !locations.length
-    ? (<div className="flex w-screen align-middle justify-center"><p className="flex flex-col justify-center">Зарежда се...</p></div>)
+    ? (<div className="flex w-screen align-middle justify-center"><div className="flex flex-col justify-center"><LoadingSpinner /></div></div>)
     : (< div className="flex flex-col w-screen" >
       <div className="flex flex-col w-auto h-16 border-b-[1px] pl-8">
         <SearchBar setSearchValue={setSearchValue} value={searchValue} />
